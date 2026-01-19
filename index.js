@@ -5,12 +5,32 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const N3 = require("n3");
+const cors = require("cors");
 
 
 // YARRRML parser (CommonJS deep import per docs)
 const Yarrrml = require("@rmlio/yarrrml-parser/lib/rml-generator");
 
 const app = express();
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:5173")
+  .split(",")
+  .map(s => s.trim());
+
+// CORS for browser clients
+app.use(cors({
+  origin: function (origin, cb) {
+    // allow non-browser tools (no Origin header) like curl
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error("Not allowed by CORS: " + origin));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+}));
+
+// Ensure preflight is handled for all routes
+app.options("*", cors());
 
 const PORT = Number(process.env.PORT || 3000);
 const RMLMAPPER_JAR = process.env.RMLMAPPER_JAR || "/opt/rmlmapper.jar";
