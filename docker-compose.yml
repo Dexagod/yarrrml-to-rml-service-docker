@@ -1,0 +1,11 @@
+services:
+  combined-map:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DEFAULT_SERIALIZATION=nquads
+      # Optional hardening if needed:
+      # - ALLOWED_FETCH_HOSTS=api.example.com,raw.githubusercontent.com
+      # - BASE_IRI=http://example.com/
